@@ -13,7 +13,19 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     launchOptions: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-extensions',
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--disable-background-networking',
+        '--no-zygote',
+        '--single-process'
+      ]
     }
   },
 
