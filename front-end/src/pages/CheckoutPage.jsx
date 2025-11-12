@@ -103,12 +103,15 @@ const CheckoutPage = () => {
 
       const response = await createOrder(orderData);
 
-      // Clear cart and checkout data
-      clearCart();
-      localStorage.removeItem('checkoutData');
-
-      // Navigate to confirmation page
+      // Navigate to confirmation page first, then clear cart
+      // (clearing cart first triggers useEffect redirect to home)
       navigate(`/confirmation/${response.data.orderId}`);
+
+      // Clear cart and checkout data after navigation
+      setTimeout(() => {
+        clearCart();
+        localStorage.removeItem('checkoutData');
+      }, 100);
     } catch (error) {
       console.error('Error creating order:', error);
       alert('Failed to place order. Please try again.');

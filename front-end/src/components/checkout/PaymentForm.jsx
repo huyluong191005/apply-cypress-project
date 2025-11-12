@@ -45,14 +45,25 @@ const PaymentForm = ({ initialData, onSubmit, onBack }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const validationErrors = validatePaymentForm(formData);
+
+    // Read from form elements to support automated testing
+    // where fill() may not trigger React's onChange properly
+    const form = e.target;
+    const currentFormData = {
+      cardNumber: form.cardNumber.value || formData.cardNumber,
+      cardholderName: form.cardholderName.value || formData.cardholderName,
+      expirationDate: form.expirationDate.value || formData.expirationDate,
+      cvv: form.cvv.value || formData.cvv
+    };
+
+    const validationErrors = validatePaymentForm(currentFormData);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    onSubmit(formData);
+    onSubmit(currentFormData);
   };
 
   return (
