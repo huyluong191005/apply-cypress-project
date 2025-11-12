@@ -80,13 +80,13 @@ test.describe('Product Catalog', () => {
   });
 
   test('should display header with logo', async ({ page }) => {
-    const logo = page.locator('text=E-Shop');
+    const logo = page.locator('header').locator('text=E-Shop');
     await expect(logo).toBeVisible();
   });
 
   test('should display cart icon in header', async ({ page }) => {
-    const cartIcon = page.locator('button:has(svg)').filter({ has: page.locator('[class*="ShoppingCart"]') });
-    await expect(cartIcon).toBeVisible();
+    const cartButton = page.locator('header button:has(svg)');
+    await expect(cartButton).toBeVisible();
   });
 
   test('should show empty cart badge initially', async ({ page }) => {

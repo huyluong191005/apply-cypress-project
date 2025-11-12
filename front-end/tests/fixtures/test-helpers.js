@@ -58,7 +58,7 @@ export class TestHelpers {
    * Open cart drawer
    */
   async openCart() {
-    await this.page.locator('button:has(svg)').filter({ has: this.page.locator('[class*="ShoppingCart"]') }).click();
+    await this.page.locator('header button:has(svg)').click();
     await this.page.waitForSelector('text=Shopping Cart', { timeout: 5000 });
   }
 
@@ -66,9 +66,14 @@ export class TestHelpers {
    * Get cart item count from badge
    */
   async getCartCount() {
-    const badge = this.page.locator('button:has(svg)').filter({ has: this.page.locator('[class*="ShoppingCart"]') }).locator('span');
-    const count = await badge.textContent();
-    return parseInt(count || '0');
+    const badge = this.page.locator('header button:has(svg) span');
+    try {
+      const count = await badge.textContent({ timeout: 1000 });
+      return parseInt(count || '0');
+    } catch {
+      // Badge not visible means count is 0
+      return 0;
+    }
   }
 
   /**
