@@ -13,29 +13,49 @@ test.describe('Filters and Search', () => {
 
   test.describe('Filter Sidebar', () => {
     test('should display filter sidebar', async ({ page }) => {
-      const filterSidebar = page.locator('text=Filters').first();
-      await expect(filterSidebar).toBeVisible();
+      // Wait for filter sidebar to load
+      const filterHeading = page.locator('h2:has-text("Filters")');
+      await expect(filterHeading).toBeVisible({ timeout: 10000 });
     });
 
     test('should have all filter sections', async ({ page }) => {
-      await expect(page.locator('text=Category')).toBeVisible();
-      await expect(page.locator('text=Price Range')).toBeVisible();
-      await expect(page.locator('text=Brand')).toBeVisible();
-      await expect(page.locator('text=Minimum Rating')).toBeVisible();
-      await expect(page.locator('text=Availability')).toBeVisible();
+      // Wait for filters to load
+      await page.waitForSelector('h2:has-text("Filters")', { timeout: 10000 });
+
+      // Check all filter section buttons
+      await expect(page.locator('button:has-text("Category")')).toBeVisible();
+      await expect(page.locator('button:has-text("Price Range")')).toBeVisible();
+      await expect(page.locator('button:has-text("Brand")')).toBeVisible();
+      await expect(page.locator('button:has-text("Minimum Rating")')).toBeVisible();
+      await expect(page.locator('button:has-text("Availability")')).toBeVisible();
     });
 
     test('should expand/collapse filter sections', async ({ page }) => {
+      // Wait for filters
+      await page.waitForSelector('h2:has-text("Filters")', { timeout: 10000 });
+
       // Find a filter section with chevron
       const categorySection = page.locator('button:has-text("Category")');
+
+      // Check if initially expanded (default)
+      const categoryCheckboxes = page.locator('input[id*="category"]');
+      const initialCount = await categoryCheckboxes.count();
+      expect(initialCount).toBeGreaterThan(0);
 
       // Click to collapse
       await categorySection.click();
       await page.waitForTimeout(300);
 
+      // Verify collapsed (checkboxes hidden)
+      const collapsedCount = await categoryCheckboxes.filter({ hasText: /./ }).count();
+
       // Click to expand
       await categorySection.click();
       await page.waitForTimeout(300);
+
+      // Verify expanded again
+      const expandedCount = await categoryCheckboxes.count();
+      expect(expandedCount).toBeGreaterThan(0);
     });
   });
 
