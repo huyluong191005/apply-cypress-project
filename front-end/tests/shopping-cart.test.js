@@ -114,12 +114,15 @@ test.describe('Shopping Cart', () => {
     });
 
     test('should increase item quantity', async ({ page }) => {
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // Get initial quantity
-      const quantitySpan = page.locator('.flex.items-center.gap-2 span').first();
+      const quantitySpan = cartDrawer.locator('.flex.items-center.gap-2 span').first();
       const initialQty = parseInt(await quantitySpan.textContent());
 
-      // Find plus button (3rd button in the quantity controls)
-      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
+      // Find plus button (2nd button in the quantity controls)
+      const plusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(300);
 
@@ -129,17 +132,20 @@ test.describe('Shopping Cart', () => {
     });
 
     test('should decrease item quantity', async ({ page }) => {
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // First increase quantity
-      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
+      const plusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(300);
 
       // Get current quantity
-      const quantitySpan = page.locator('.flex.items-center.gap-2 span').first();
+      const quantitySpan = cartDrawer.locator('.flex.items-center.gap-2 span').first();
       const currentQty = parseInt(await quantitySpan.textContent());
 
       // Then decrease
-      const minusButton = page.locator('.flex.items-center.gap-2 button').nth(0);
+      const minusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(0);
       await minusButton.click();
       await page.waitForTimeout(300);
 
@@ -149,8 +155,11 @@ test.describe('Shopping Cart', () => {
     });
 
     test('should not decrease quantity below 1', async ({ page }) => {
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // Try to decrease quantity
-      const minusButton = page.locator('.flex.items-center.gap-2 button').nth(0);
+      const minusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(0);
 
       // Button should be disabled
       const isDisabled = await minusButton.isDisabled();
@@ -158,8 +167,11 @@ test.describe('Shopping Cart', () => {
     });
 
     test('should remove item from cart', async ({ page }) => {
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // Click remove button (button with red text color)
-      const removeButton = page.locator('button.text-red-600').first();
+      const removeButton = cartDrawer.locator('button.text-red-600').first();
       await removeButton.click();
       await page.waitForTimeout(500);
 
@@ -176,16 +188,19 @@ test.describe('Shopping Cart', () => {
     });
 
     test('should update subtotal when quantity changes', async ({ page }) => {
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // Get initial item subtotal (in the cart item, not summary)
-      const initialSubtotal = await page.locator('.font-semibold.text-gray-900').first().textContent();
+      const initialSubtotal = await cartDrawer.locator('.font-semibold.text-gray-900').first().textContent();
 
       // Increase quantity
-      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
+      const plusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(500);
 
       // Get new subtotal
-      const newSubtotal = await page.locator('.font-semibold.text-gray-900').first().textContent();
+      const newSubtotal = await cartDrawer.locator('.font-semibold.text-gray-900').first().textContent();
 
       // Verify subtotal changed
       expect(newSubtotal).not.toBe(initialSubtotal);
@@ -220,9 +235,11 @@ test.describe('Shopping Cart', () => {
     });
 
     test('should show FREE shipping for orders over $100', async ({ page }) => {
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // Add enough products to exceed $100
-      // This test assumes we can add multiple items
-      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
+      const plusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(1);
 
       // Add multiple items
       for (let i = 0; i < 5; i++) {
@@ -231,7 +248,7 @@ test.describe('Shopping Cart', () => {
       }
 
       // Check if FREE shipping is shown
-      const freeShipping = page.locator('text=FREE');
+      const freeShipping = cartDrawer.locator('text=FREE');
       const count = await freeShipping.count();
       if (count > 0) {
         await expect(freeShipping).toBeVisible();
@@ -287,8 +304,11 @@ test.describe('Shopping Cart', () => {
       await page.waitForTimeout(500);
       await helpers.openCart();
 
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // Increase quantity
-      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
+      const plusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(300);
 
@@ -353,8 +373,11 @@ test.describe('Shopping Cart', () => {
       await page.waitForTimeout(500);
       await helpers.openCart();
 
+      // Scope to cart drawer
+      const cartDrawer = page.locator('.fixed.top-0.right-0');
+
       // Try to increase quantity many times
-      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
+      const plusButton = cartDrawer.locator('.flex.items-center.gap-2 button').nth(1);
 
       for (let i = 0; i < 20; i++) {
         const isDisabled = await plusButton.isDisabled();
