@@ -63,8 +63,8 @@ test.describe('Shopping Cart', () => {
     test('should close cart drawer', async ({ page }) => {
       await helpers.openCart();
 
-      // Click close button
-      const closeButton = page.locator('button').filter({ has: page.locator('[class*="X"]') }).first();
+      // Click close button (button next to "Shopping Cart" heading)
+      const closeButton = page.locator('button.hover\\:bg-gray-100.rounded-full').first();
       await closeButton.click();
       await page.waitForTimeout(300);
 
@@ -114,70 +114,78 @@ test.describe('Shopping Cart', () => {
     });
 
     test('should increase item quantity', async ({ page }) => {
-      // Find plus button
-      const plusButton = page.locator('button').filter({ has: page.locator('[class*="Plus"]') }).first();
+      // Get initial quantity
+      const quantitySpan = page.locator('.flex.items-center.gap-2 span').first();
+      const initialQty = parseInt(await quantitySpan.textContent());
+
+      // Find plus button (3rd button in the quantity controls)
+      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(300);
 
       // Verify quantity increased
-      const quantity = page.locator('span:near(button:has([class*="Plus"]))').first();
-      const qtyText = await quantity.textContent();
-      expect(parseInt(qtyText)).toBeGreaterThanOrEqual(2);
+      const newQty = parseInt(await quantitySpan.textContent());
+      expect(newQty).toBe(initialQty + 1);
     });
 
     test('should decrease item quantity', async ({ page }) => {
       // First increase quantity
-      const plusButton = page.locator('button').filter({ has: page.locator('[class*="Plus"]') }).first();
+      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(300);
 
+      // Get current quantity
+      const quantitySpan = page.locator('.flex.items-center.gap-2 span').first();
+      const currentQty = parseInt(await quantitySpan.textContent());
+
       // Then decrease
-      const minusButton = page.locator('button').filter({ has: page.locator('[class*="Minus"]') }).first();
+      const minusButton = page.locator('.flex.items-center.gap-2 button').nth(0);
       await minusButton.click();
       await page.waitForTimeout(300);
 
       // Verify quantity decreased
-      const quantity = page.locator('span:near(button:has([class*="Minus"]))').first();
-      const qtyText = await quantity.textContent();
-      expect(parseInt(qtyText)).toBe(1);
+      const newQty = parseInt(await quantitySpan.textContent());
+      expect(newQty).toBe(currentQty - 1);
     });
 
     test('should not decrease quantity below 1', async ({ page }) => {
       // Try to decrease quantity
-      const minusButton = page.locator('button').filter({ has: page.locator('[class*="Minus"]') }).first();
+      const minusButton = page.locator('.flex.items-center.gap-2 button').nth(0);
 
-      // Button should be disabled or quantity stays at 1
+      // Button should be disabled
       const isDisabled = await minusButton.isDisabled();
       expect(isDisabled).toBe(true);
     });
 
     test('should remove item from cart', async ({ page }) => {
-      // Click remove button
-      const removeButton = page.locator('button').filter({ has: page.locator('[class*="Trash"]') }).first();
+      // Click remove button (button with red text color)
+      const removeButton = page.locator('button.text-red-600').first();
       await removeButton.click();
       await page.waitForTimeout(500);
 
       // Verify empty cart message appears
       await expect(page.locator('text=Your cart is empty')).toBeVisible();
 
-      // Verify cart count is 0
-      await page.click('body'); // Click outside to close drawer
+      // Close drawer by clicking backdrop
+      await page.locator('.bg-black.bg-opacity-50').click();
       await page.waitForTimeout(300);
+
+      // Verify cart count is 0
       const cartCount = await helpers.getCartCount();
       expect(cartCount).toBe(0);
     });
 
     test('should update subtotal when quantity changes', async ({ page }) => {
-      // Get initial subtotal
-      const initialSubtotal = await page.locator('text=/Subtotal/').locator('.. >> text=/\\$/').textContent();
+      // Get initial item subtotal (in the cart item, not summary)
+      const initialSubtotal = await page.locator('.font-semibold.text-gray-900').first().textContent();
 
       // Increase quantity
-      const plusButton = page.locator('button').filter({ has: page.locator('[class*="Plus"]') }).first();
+      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(500);
 
       // Get new subtotal
-      const newSubtotal = await page.locator('text=/Subtotal/').locator('.. >> text=/\\$/').textContent();
+      const newSubtotal = await page.locator('.font-semibold.text-gray-900').first().textContent();
 
       // Verify subtotal changed
       expect(newSubtotal).not.toBe(initialSubtotal);
@@ -214,7 +222,7 @@ test.describe('Shopping Cart', () => {
     test('should show FREE shipping for orders over $100', async ({ page }) => {
       // Add enough products to exceed $100
       // This test assumes we can add multiple items
-      const plusButton = page.locator('button').filter({ has: page.locator('[class*="Plus"]') }).first();
+      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
 
       // Add multiple items
       for (let i = 0; i < 5; i++) {
@@ -280,12 +288,15 @@ test.describe('Shopping Cart', () => {
       await helpers.openCart();
 
       // Increase quantity
-      const plusButton = page.locator('button').filter({ has: page.locator('[class*="Plus"]') }).first();
+      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
       await plusButton.click();
       await page.waitForTimeout(300);
 
-      // Close cart and reload
-      await page.click('body');
+      // Close cart by clicking backdrop
+      await page.locator('.bg-black.bg-opacity-50').click();
+      await page.waitForTimeout(300);
+
+      // Reload page
       await page.reload();
       await page.waitForLoadState('networkidle');
 
@@ -343,7 +354,7 @@ test.describe('Shopping Cart', () => {
       await helpers.openCart();
 
       // Try to increase quantity many times
-      const plusButton = page.locator('button').filter({ has: page.locator('[class*="Plus"]') }).first();
+      const plusButton = page.locator('.flex.items-center.gap-2 button').nth(1);
 
       for (let i = 0; i < 20; i++) {
         const isDisabled = await plusButton.isDisabled();
@@ -353,7 +364,8 @@ test.describe('Shopping Cart', () => {
       }
 
       // Verify button eventually becomes disabled (stock limit reached)
-      // This test ensures we don't allow adding more than available stock
+      const isDisabled = await plusButton.isDisabled();
+      expect(isDisabled).toBe(true);
     });
   });
 });
