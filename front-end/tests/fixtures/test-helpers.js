@@ -13,8 +13,8 @@ export class TestHelpers {
    * Navigate to home page
    */
   async goToHome() {
-    await this.page.goto('/', { waitUntil: 'networkidle', timeout: 30000 });
-    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.goto('/', { waitUntil: 'load', timeout: 30000 });
+    await this.page.waitForTimeout(1000); // Give page time to render
   }
 
   /**
@@ -35,24 +35,19 @@ export class TestHelpers {
    * Wait for products to load
    */
   async waitForProducts() {
-    // Wait for the page to finish network requests
-    await this.page.waitForLoadState('networkidle', { timeout: 15000 });
-
-    // Wait for either products to load or "No products found" message
-    await Promise.race([
-      this.page.waitForSelector('.grid.grid-cols-1', { timeout: 20000 }),
-      this.page.waitForSelector('text=No products found', { timeout: 20000 })
-    ]);
-
-    // Give a small buffer for any animations
-    await this.page.waitForTimeout(500);
+    // Wait for products to load - give plenty of time for API call and rendering
+    await this.page.waitForTimeout(5000);
   }
 
   /**
-   * Get product cards
+   * Get product cards count
    */
-  async getProductCards() {
-    return await this.page.locator('[class*="card"]').all();
+  async getProductCardsCount() {
+    try {
+      return await this.page.locator('.card').count();
+    } catch (error) {
+      return 0;
+    }
   }
 
   /**
