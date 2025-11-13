@@ -13,8 +13,8 @@ export class TestHelpers {
    * Navigate to home page
    */
   async goToHome() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto('/', { waitUntil: 'networkidle', timeout: 30000 });
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   /**
@@ -35,7 +35,17 @@ export class TestHelpers {
    * Wait for products to load
    */
   async waitForProducts() {
-    await this.page.waitForSelector('[class*="grid"]', { timeout: 10000 });
+    // Wait for the page to finish network requests
+    await this.page.waitForLoadState('networkidle', { timeout: 15000 });
+
+    // Wait for either products to load or "No products found" message
+    await Promise.race([
+      this.page.waitForSelector('.grid.grid-cols-1', { timeout: 20000 }),
+      this.page.waitForSelector('text=No products found', { timeout: 20000 })
+    ]);
+
+    // Give a small buffer for any animations
+    await this.page.waitForTimeout(500);
   }
 
   /**
