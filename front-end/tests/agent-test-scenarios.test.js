@@ -51,10 +51,11 @@ test.describe('Agent Test Scenarios', () => {
   // ============================================================
   // SCENARIO 1.4: Incorrect Scoping
   // ============================================================
-  test.skip('SCENARIO 1.4: should have logo in header - BROKEN: matches footer too', async ({ page }) => {
-    // INTENTIONAL BUG: "E-Shop" appears in both header and footer
-    const logo = page.locator('text=E-Shop');
-    await expect(logo).toBeVisible(); // May fail with strict mode if in both places
+  test('SCENARIO 1.4: should have logo in header - FIXED', async ({ page }) => {
+    // Fixed: Use role-based selector to target the logo link in header
+    // This avoids matching the footer text that also contains "E-Shop"
+    const logo = page.getByRole('link', { name: 'E-Shop' });
+    await expect(logo).toBeVisible();
   });
 
   // ============================================================
@@ -92,11 +93,12 @@ test.describe('Agent Test Scenarios', () => {
   // ============================================================
   // SCENARIO 2.3: Type Mismatch
   // ============================================================
-  test.skip('SCENARIO 2.3: should display product price - BROKEN: type mismatch', async ({ page }) => {
+  test('SCENARIO 2.3: should display product price - FIXED', async ({ page }) => {
     const firstProduct = page.locator('[class*="card"]').first();
-    const priceText = await firstProduct.locator('[class*="price"]').first().textContent();
-    // INTENTIONAL BUG: Comparing string to number
-    expect(priceText).toBe(19.99); // Should be "$19.99" or similar string
+    // Fixed: Use actual class that exists (font-bold) instead of non-existent "price" class
+    const priceText = await firstProduct.locator('.font-bold').first().textContent();
+    // Fixed: Compare string to string and check for USD format (e.g., "$80.70")
+    expect(priceText).toMatch(/^\$\d+\.\d{2}$/); // Matches "$XX.XX" format
   });
 
   // ============================================================
@@ -117,9 +119,9 @@ test.describe('Agent Test Scenarios', () => {
   // ============================================================
   // SCENARIO 3.2: Insufficient Timeout
   // ============================================================
-  test.skip('SCENARIO 3.2: should load slow element - BROKEN: timeout too short', async ({ page }) => {
-    // INTENTIONAL BUG: Timeout way too short for network-dependent element
-    await page.waitForSelector('[class*="grid"]', { timeout: 100 });
+  test('SCENARIO 3.2: should load slow element - FIXED', async ({ page }) => {
+    // Fixed: Use appropriate timeout for network-dependent element (10 seconds for network requests)
+    await page.waitForSelector('[class*="grid"]', { timeout: 10000 });
     expect(true).toBe(true);
   });
 
@@ -156,10 +158,18 @@ test.describe('Agent Test Scenarios', () => {
   // ============================================================
   // SCENARIO 5.1: Incorrect URL
   // ============================================================
-  test.skip('SCENARIO 5.1: should navigate to checkout - BROKEN: wrong URL', async ({ page }) => {
+  test('SCENARIO 5.1: should navigate to checkout - FIXED', async ({ page }) => {
     await helpers.addFirstProductToCart();
-    // INTENTIONAL BUG: Wrong route path
-    await page.goto('/cart/checkout'); // Should be just '/checkout'
+
+    // Fixed: Original bug was wrong URL '/cart/checkout' instead of '/checkout'
+    // However, direct URL navigation to /checkout has an app-level race condition where
+    // the route guard checks before cart loads from localStorage.
+    // Workaround: Use UI navigation (same as SCENARIO 3.1) to avoid the race condition
+    await helpers.openCart();
+    await page.click('button:has-text("Proceed to Checkout")');
+    await page.waitForURL(/\/checkout/);
+
+    // Verify we're on checkout page
     await expect(page.locator('text=Checkout')).toBeVisible();
   });
 
@@ -200,18 +210,52 @@ test.describe('Agent Test Scenarios', () => {
   // ============================================================
   // SCENARIO 7.1: Conditional Rendering
   // ============================================================
-  test.skip('SCENARIO 7.1: should show out of stock badge - BROKEN: not conditional', async ({ page }) => {
-    // INTENTIONAL BUG: Assumes all products have "Out of Stock" badge
-    const badge = page.locator('text=Out of Stock').first();
-    await expect(badge).toBeVisible(); // Will fail if no products are out of stock
+  test('SCENARIO 7.1: should show out of stock badge - FIXED: properly tests conditional rendering', async ({ page }) => {
+    // Fixed: Properly test conditional rendering of "Out of Stock" badge
+    // The badge should appear on out-of-stock products and NOT on in-stock products
+
+    // Find all product cards
+    const productCards = page.locator('.card');
+    const cardCount = await productCards.count();
+    expect(cardCount).toBeGreaterThan(0);
+
+    // Test 1: Verify out-of-stock products show the badge
+    // Products with "Out of Stock" button text are out of stock
+    const outOfStockButtons = page.getByRole('button', { name: 'Out of Stock', exact: true });
+    const outOfStockCount = await outOfStockButtons.count();
+
+    if (outOfStockCount > 0) {
+      // If there are out-of-stock products, verify the first one has the badge
+      const firstOutOfStockProduct = productCards.filter({ has: outOfStockButtons.first() });
+      const badge = firstOutOfStockProduct.locator('span:has-text("Out of Stock")').first();
+      await expect(badge).toBeVisible();
+    }
+
+    // Test 2: Verify in-stock products do NOT show the badge
+    // Products with "Add to Cart" button text are in stock
+    const addToCartButtons = page.getByRole('button', { name: 'Add to Cart', exact: true });
+    const inStockCount = await addToCartButtons.count();
+
+    if (inStockCount > 0) {
+      // If there are in-stock products, verify the first one does NOT have the badge
+      const firstInStockProduct = productCards.filter({ has: addToCartButtons.first() });
+      const badge = firstInStockProduct.locator('span:has-text("Out of Stock")');
+      await expect(badge).toHaveCount(0);
+    }
   });
 
   // ============================================================
   // SCENARIO 8.1: Viewport Issue
   // ============================================================
-  test.skip('SCENARIO 8.1: should show mobile menu button - BROKEN: desktop viewport', async ({ page }) => {
-    // INTENTIONAL BUG: Looking for mobile element in desktop viewport
+  test('SCENARIO 8.1: should show mobile menu button - FIXED', async ({ page }) => {
+    // Fixed: Set viewport to mobile size to show mobile menu button
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    // Reload to apply responsive changes
+    await page.reload();
+    await helpers.waitForProducts();
+
     const mobileMenuButton = page.locator('button[aria-label="Open menu"]');
-    await expect(mobileMenuButton).toBeVisible(); // Will fail in desktop viewport
+    await expect(mobileMenuButton).toBeVisible();
   });
 });
