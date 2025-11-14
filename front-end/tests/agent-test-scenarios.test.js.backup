@@ -324,37 +324,17 @@ test.describe('Agent Test Scenarios', () => {
     await page.click('button:has-text("Continue to Payment")');
     await page.waitForTimeout(500);
 
-    // Fixed: Verify we're still on shipping page with validation errors displayed
-    // Should NOT advance to payment page when validation fails
-    await expect(page.locator('text=Shipping Information')).toBeVisible();
-    // Verify at least one validation error is shown
-    await expect(page.locator('text=Name is required')).toBeVisible();
+    // INTENTIONAL BUG: Checking for payment page instead of staying on shipping with errors
+    await expect(page.locator('text=Payment Information')).toBeVisible();
   });
 
   // ============================================================
   // SCENARIO 9.3: Multiple Similar Elements (Nth Element)
   // ============================================================
-  test('SCENARIO 9.3: should interact with second product - FIXED: validates nth element exists', async ({ page }) => {
-    // Fixed: Verify sufficient products exist before using .nth()
-    const productCards = page.locator('[class*="card"]');
-    const productCount = await productCards.count();
-
-    // Assert at least 2 products exist for a meaningful test
-    expect(productCount).toBeGreaterThanOrEqual(2);
-
-    // Now safely select the second product
-    const secondProduct = productCards.nth(1);
-
-    // Verify the second product is visible before interacting
-    await expect(secondProduct).toBeVisible();
-
-    // Find Add to Cart button in second product (will fail clearly if out of stock)
+  test('SCENARIO 9.3: should interact with second product - BROKEN: hardcoded index', async ({ page }) => {
+    // INTENTIONAL BUG: Using .nth(1) without checking if element exists
+    const secondProduct = page.locator('[class*="card"]').nth(1);
     const addButton = secondProduct.locator('button:has-text("Add to Cart")');
-
-    // Verify button exists and is enabled before clicking
-    await expect(addButton).toBeVisible();
-    await expect(addButton).toBeEnabled();
-
     await addButton.click();
 
     const cartCount = await helpers.getCartCount();
@@ -364,17 +344,15 @@ test.describe('Agent Test Scenarios', () => {
   // ============================================================
   // SCENARIO 9.4: Race Condition Between Actions
   // ============================================================
-  test('SCENARIO 9.4: should handle rapid clicks - FIXED', async ({ page }) => {
-    // Fixed: Test correctly verifies that rapid clicks are all processed
-    // The app does NOT have debouncing - each click increments quantity by 1
-    // React's useReducer processes each action synchronously
+  test('SCENARIO 9.4: should handle rapid clicks - BROKEN: no debounce wait', async ({ page }) => {
+    // INTENTIONAL BUG: Clicking multiple times rapidly without waiting for state updates
     const addButton = page.getByRole('button', { name: 'Add to Cart' }).first();
     await addButton.click();
     await addButton.click(); // Click again immediately
     await addButton.click(); // And again
 
     const cartCount = await helpers.getCartCount();
-    // All 3 clicks are processed correctly - no debouncing in the app
+    // Might expect 3 but app might have debounce or state race
     expect(cartCount).toBe(3);
   });
   // ============================================================
