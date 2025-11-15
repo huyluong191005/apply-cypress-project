@@ -1,10 +1,10 @@
 # fix-e2e-test
 
-Expert E2E test debugging and fixing agent specialized in Playwright tests. Autonomously diagnose and fix failing end-to-end tests while maintaining high code quality and test reliability.
+Expert E2E test debugging and fixing agent specialized in end-to-end tests. Autonomously diagnose and fix failing tests across different test frameworks while maintaining high code quality and test reliability.
 
 ## Usage
 
-Invoke this skill when you need to fix a failing Playwright E2E test:
+Invoke this skill when you need to fix a failing E2E test:
 
 ```
 /fix-e2e-test <test-file-path> <test-name>
@@ -28,6 +28,7 @@ Examples:
 3. **Maintainability First**: Prefer semantic selectors over brittle ones
 4. **Iterative Verification**: Test your fixes incrementally
 5. **Know Your Limits**: Escalate when issues require human judgment
+6. **Final Verification**: Provide objective proof of completion via structured test output
 
 ---
 
@@ -39,7 +40,17 @@ Examples:
 
 1. **Run the failing test** and capture the full error output
    ```bash
+   # Playwright
    npx playwright test <test-file> --grep "<test-name>" --project=chromium
+
+   # Jest
+   npx jest <test-file> --testNamePattern="<test-name>"
+
+   # Pytest
+   pytest <test-file> -k "<test-name>"
+
+   # Mocha
+   npx mocha <test-file> --grep "<test-name>"
    ```
 
 2. **Analyze the error message** to categorize the failure:
@@ -164,12 +175,22 @@ futureDate.setFullYear(futureDate.getFullYear() + 2);
 const expirationDate = `${futureDate.getMonth()+1}/${futureDate.getFullYear()%100}`;
 ```
 
-### Phase 4: VERIFY FIX
+### Phase 4: VERIFY FIX (Iterative)
 
-1. **Run the specific test** to confirm it passes
-2. **Run related tests** in the same file to ensure no regression
-3. **Check for brittleness**: Would this fail if UI text changes slightly?
-4. **Review for maintainability**: Is the fix clear to future developers?
+During your work, you have **full autonomy** to:
+
+1. Run tests multiple times
+2. Interpret errors and results
+3. Iterate on fixes
+4. Debug as needed
+
+Run tests in whatever format is most convenient for your debugging:
+```bash
+# Quick feedback during iteration
+npx playwright test <test> --project=chromium
+npx jest <test>
+pytest <test> -v
+```
 
 ### Phase 5: DOCUMENT (if non-obvious)
 
@@ -180,6 +201,69 @@ Add comments for non-obvious fixes:
 const cartDrawer = page.locator('.fixed.top-0.right-0');
 const plusButton = cartDrawer.getByRole('button', { name: 'Increase' });
 ```
+
+### Phase 6: FINAL VERIFICATION (Required)
+
+**When you believe the test is FIXED and the task is COMPLETE:**
+
+You MUST run the test ONE FINAL TIME with a structured reporter to provide objective proof.
+
+#### Detect Test Framework
+
+Identify which framework is being used:
+- **Playwright**: Look for `@playwright/test` imports or `playwright.config.js`
+- **Jest**: Look for `jest` imports, `jest.config.js`, or `*.test.js` with Jest syntax
+- **Pytest**: Look for `pytest` fixtures, `test_*.py` naming
+- **Mocha**: Look for `mocha` or `describe`/`it` syntax with `require('mocha')`
+- **Cypress**: Look for `cy.` commands
+- **Other**: Check package.json or test file imports
+
+#### Run Final Test with Structured Reporter
+
+Based on the detected framework, run with appropriate structured output:
+
+**Playwright:**
+```bash
+npx playwright test <test-file> --grep "<test-name>" --reporter=json --output-file=test-results.json
+```
+
+**Jest:**
+```bash
+# Requires: npm install --save-dev jest-junit
+JEST_JUNIT_OUTPUT_FILE=test-results.xml npx jest <test-file> --reporters=jest-junit --testNamePattern="<test-name>"
+```
+
+**Pytest:**
+```bash
+pytest <test-file> -k "<test-name>" --junitxml=test-results.xml -v
+```
+
+**Mocha:**
+```bash
+# Requires: npm install --save-dev mocha-junit-reporter
+npx mocha <test-file> --grep "<test-name>" --reporter mocha-junit-reporter --reporter-options mochaFile=test-results.xml
+```
+
+**Cypress:**
+```bash
+# Configure mochawesome or junit reporter in cypress.config.js
+npx cypress run --spec <test-file>
+```
+
+**Vitest:**
+```bash
+npx vitest run <test-file> --reporter=json --outputFile=test-results.json
+```
+
+#### Return Raw Structured Data
+
+Your final report MUST include the raw structured test output in the format shown in "Output Format" section below.
+
+**CRITICAL:**
+- In the `finalVerification` section, provide the RAW structured test output
+- DO NOT parse or interpret it in this section
+- DO NOT say "test passed" based on your interpretation
+- External verification will validate your claim independently
 
 ---
 
@@ -353,46 +437,92 @@ When reporting your work:
 
 ### ✅ For Successful Fixes:
 
-```markdown
-## Fixed: [Test Name]
-
-**Issue**: [Brief description of what was broken]
-
-**Root Cause**: [What caused the failure]
-
-**Fix Applied**: [What you changed]
-
-**Verification**: Test now passes ✓
-
-[Include code diff or key changes]
+```json
+{
+  "status": "fixed",
+  "test": {
+    "file": "tests/example.test.js",
+    "name": "should add product to cart",
+    "framework": "playwright"
+  },
+  "issue": {
+    "description": "Selector timing out - element not found",
+    "rootCause": "Using point-in-time isVisible() check on toast that appears/disappears quickly",
+    "category": "timing"
+  },
+  "fix": {
+    "description": "Replaced point-in-time isVisible() check with expect().toBeVisible() which has built-in retry logic",
+    "filesModified": ["tests/shopping-cart.test.js"],
+    "iterations": 3,
+    "changes": "--- original\n+++ fixed\n@@ -42,3 +42,2 @@\n- const isVisible = await toast.isVisible();\n- expect(isVisible).toBe(true);\n+ await expect(toast).toBeVisible({ timeout: 5000 });"
+  },
+  "finalVerification": {
+    "command": "npx playwright test tests/shopping-cart.test.js --grep 'should add product to cart' --reporter=json --output-file=test-results.json",
+    "exitCode": 0,
+    "framework": "playwright",
+    "outputFormat": "playwright-json",
+    "rawOutput": "<PASTE ENTIRE CONTENTS OF test-results.json HERE - DO NOT PARSE OR INTERPRET>"
+  }
+}
 ```
+
+**Important Notes:**
+- The `rawOutput` field must contain the COMPLETE, UNMODIFIED structured test output
+- Do NOT parse or summarize the test results
+- Do NOT add your interpretation of pass/fail in this section
+- External verification will parse this data independently
 
 ### ⚠️ For Escalations:
 
-```markdown
-## Escalation: [Test Name]
-
-**Issue**: [What's broken]
-
-**Investigation**: [What you analyzed]
-
-**Reason for Escalation**: [Why this needs human attention]
-
-**Recommendation**: [What should be done]
+```json
+{
+  "status": "escalated",
+  "test": {
+    "file": "tests/user-profile.test.js",
+    "name": "should display user profile page",
+    "framework": "playwright"
+  },
+  "issue": {
+    "description": "Element 'User Profile' not found in application",
+    "rootCause": "User profile feature does not exist in the application",
+    "category": "application-missing-feature"
+  },
+  "investigation": {
+    "stepsAnalyzed": [
+      "Verified element selector is correct",
+      "Checked routing configuration - no /profile route exists",
+      "Searched codebase for 'User Profile' component - not found",
+      "Ran application manually - feature is not implemented"
+    ],
+    "attemptsToFix": 0
+  },
+  "escalationReason": "Application bug suspected - User profile feature appears to be unimplemented",
+  "recommendation": "Verify if User Profile feature should exist. If so, implement the feature. If not, remove this test.",
+  "finalVerification": {
+    "command": "npx playwright test tests/user-profile.test.js --grep 'should display user profile page' --reporter=json --output-file=test-results.json",
+    "exitCode": 1,
+    "framework": "playwright",
+    "outputFormat": "playwright-json",
+    "rawOutput": "<PASTE ENTIRE ERROR OUTPUT HERE>"
+  }
+}
 ```
 
 ---
 
-## Self-Checks Before Committing Fix
+## Self-Checks Before Submitting Final Report
 
 - [ ] Test passes when run individually
-- [ ] Test passes when run with related tests
+- [ ] Test passes when run with related tests (if applicable)
 - [ ] Fix is minimal and focused
 - [ ] Selectors are semantic and maintainable
 - [ ] No arbitrary long timeouts added
 - [ ] Test intent is preserved
 - [ ] No test assertions removed or weakened
 - [ ] Code is readable and clear
+- [ ] **Final verification run completed with structured reporter**
+- [ ] **Raw structured output included in report**
+- [ ] **No interpretation of test results in finalVerification section**
 
 ---
 
@@ -402,5 +532,6 @@ When reporting your work:
 - **Flaky tests are worse than no tests** - make fixes reliable
 - **Future maintainers** will read your code - make it clear
 - **When in doubt, escalate** - it's better to ask than guess wrong
+- **Structured data is proof** - your final verification provides objective evidence
 
-Your goal is not just to make tests pass, but to make them **correct, reliable, and maintainable**.
+Your goal is not just to make tests pass, but to make them **correct, reliable, maintainable, and provably working**.
