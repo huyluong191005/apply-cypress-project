@@ -17,14 +17,7 @@ export default defineConfig({
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--disable-extensions',
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--disable-background-networking',
-        '--no-zygote',
-        '--single-process'
+        '--disable-gpu'
       ]
     }
   },
@@ -32,7 +25,21 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        viewport: { width: 1280, height: 720 },
+        launchOptions: {
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--js-flags=--expose-gc',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-features=site-per-process'
+          ],
+          chromiumSandbox: false
+        }
+      },
     },
 
     {
@@ -48,7 +55,17 @@ export default defineConfig({
     // Test mobile viewports
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: {
+        ...devices['Pixel 5'],
+        launchOptions: {
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu'
+          ]
+        }
+      },
     },
 
     {

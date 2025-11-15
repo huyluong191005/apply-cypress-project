@@ -15,11 +15,11 @@ test.describe('Product Catalog', () => {
     await helpers.waitForProducts();
 
     // Check that products are displayed
-    const productCards = await helpers.getProductCards();
-    expect(productCards.length).toBeGreaterThan(0);
+    const productCount = await helpers.getProductCardsCount();
+    expect(productCount).toBeGreaterThan(0);
 
     // Verify product card elements
-    const firstProduct = page.locator('[class*="card"]').first();
+    const firstProduct = page.locator('.card').first();
     await expect(firstProduct.locator('img')).toBeVisible();
     await expect(firstProduct.locator('text=/\\$/').first()).toBeVisible(); // Price
   });

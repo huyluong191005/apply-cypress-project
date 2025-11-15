@@ -13,8 +13,8 @@ export class TestHelpers {
    * Navigate to home page
    */
   async goToHome() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto('/', { waitUntil: 'load', timeout: 30000 });
+    await this.page.waitForTimeout(1000); // Give page time to render
   }
 
   /**
@@ -35,14 +35,19 @@ export class TestHelpers {
    * Wait for products to load
    */
   async waitForProducts() {
-    await this.page.waitForSelector('[class*="grid"]', { timeout: 10000 });
+    // Wait for products to load - give plenty of time for API call and rendering
+    await this.page.waitForTimeout(5000);
   }
 
   /**
-   * Get product cards
+   * Get product cards count
    */
-  async getProductCards() {
-    return await this.page.locator('[class*="card"]').all();
+  async getProductCardsCount() {
+    try {
+      return await this.page.locator('.card').count();
+    } catch (error) {
+      return 0;
+    }
   }
 
   /**
