@@ -1,0 +1,8 @@
+{
+  "name": "fix-e2e-test",
+  "description": "Autonomous E2E test debugging and fixing agent for Playwright tests. Systematically diagnoses and fixes failing tests using behavior-driven debugging.",
+  "version": "1.0.0",
+  "tags": ["testing", "e2e", "playwright", "debugging", "automation"],
+  "author": "Claude Code Research",
+  "model": "sonnet"
+}
