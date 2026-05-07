@@ -18,7 +18,7 @@ const Input = ({
         {...props}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p data-cy="validation-error" className="mt-1 text-sm text-red-600">{error}</p>
       )}
     </div>
   );

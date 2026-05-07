@@ -125,7 +125,7 @@ const CheckoutPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div data-cy="checkout-page" className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8 text-center">Checkout</h1>
@@ -135,7 +135,7 @@ const CheckoutPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Form Section */}
             <div className="lg:col-span-2">
-              <div className="card">
+              <div data-cy="checkout-form" className="card">
                 {currentStep === 1 && (
                   <ShippingForm
                     initialData={checkoutData.shipping}
@@ -169,7 +169,7 @@ const CheckoutPage = () => {
                 <h3 className="text-lg font-bold mb-4">Order Summary</h3>
                 <div className="space-y-3 mb-4">
                   {cart.items.map((item) => (
-                    <div key={item.productId} className="flex gap-3 text-sm">
+                    <div key={item.productId} data-cy="checkout-summary-item" className="flex gap-3 text-sm">
                       <img
                         src={item.product.primaryImage}
                         alt={item.product.name}

@@ -42,11 +42,12 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form data-cy="shipping-form" onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold mb-4">Shipping Information</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
+          data-cy="shipping-name"
           label="Full Name *"
           id="name"
           name="name"
@@ -56,6 +57,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
         />
 
         <Input
+          data-cy="shipping-email"
           label="Email *"
           id="email"
           name="email"
@@ -67,6 +69,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
       </div>
 
       <Input
+        data-cy="shipping-phone"
         label="Phone Number *"
         id="phone"
         name="phone"
@@ -77,6 +80,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
       />
 
       <Input
+        data-cy="shipping-address"
         label="Street Address *"
         id="address"
         name="address"
@@ -86,6 +90,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
       />
 
       <Input
+        data-cy="shipping-apartment"
         label="Apartment, Suite, etc. (Optional)"
         id="apartment"
         name="apartment"
@@ -95,6 +100,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Input
+          data-cy="shipping-city"
           label="City *"
           id="city"
           name="city"
@@ -108,6 +114,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
             State *
           </label>
           <select
+            data-cy="shipping-state"
             id="state"
             name="state"
             value={formData.state}
@@ -127,11 +134,12 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
             <option value="MI">Michigan</option>
           </select>
           {errors.state && (
-            <p className="mt-1 text-sm text-red-600">{errors.state}</p>
+            <p data-cy="validation-error" className="mt-1 text-sm text-red-600">{errors.state}</p>
           )}
         </div>
 
         <Input
+          data-cy="shipping-zip"
           label="ZIP Code *"
           id="zipCode"
           name="zipCode"
@@ -146,6 +154,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
           Country *
         </label>
         <select
+          data-cy="shipping-country"
           id="country"
           name="country"
           value={formData.country}
@@ -159,6 +168,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
       </div>
 
       <Checkbox
+        data-cy="same-as-billing"
         id="sameAsBilling"
         label="Billing address is same as shipping address"
         checked={sameAsBilling}
@@ -171,7 +181,7 @@ const ShippingForm = ({ initialData, onSubmit, onBack }) => {
             Back
           </Button>
         )}
-        <Button type="submit" className="flex-1">
+        <Button data-cy="continue-to-payment" type="submit" className="flex-1">
           Continue to Payment
         </Button>
       </div>

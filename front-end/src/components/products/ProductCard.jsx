@@ -23,10 +23,11 @@ const ProductCard = ({ product }) => {
 
   return (
     <>
-      <div className="card hover:shadow-md transition-shadow group">
+      <div data-cy="product-card" data-product-id={product.id} className="card hover:shadow-md transition-shadow group">
         {/* Image */}
         <div className="relative mb-3">
           <img
+            data-cy="product-image"
             src={product.primaryImage}
             alt={product.name}
             className="w-full h-48 object-cover rounded-lg"
@@ -46,10 +47,10 @@ const ProductCard = ({ product }) => {
         {/* Content */}
         <div className="space-y-2">
           {/* Brand */}
-          <p className="text-xs text-gray-500 uppercase">{product.brand}</p>
+          <p data-cy="product-brand" className="text-xs text-gray-500 uppercase">{product.brand}</p>
 
           {/* Name */}
-          <h3 className="font-medium text-gray-900 line-clamp-2 min-h-[2.5rem]">
+          <h3 data-cy="product-name" className="font-medium text-gray-900 line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
 
@@ -62,7 +63,7 @@ const ProductCard = ({ product }) => {
 
           {/* Price */}
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-900">
+            <span data-cy="product-price" className="text-lg font-bold text-gray-900">
               {formatPrice(product.price)}
             </span>
             {product.originalPrice && (
@@ -74,6 +75,7 @@ const ProductCard = ({ product }) => {
 
           {/* Add to Cart Button */}
           <Button
+            data-cy="add-to-cart-button"
             onClick={handleAddToCart}
             disabled={!product.inStock}
             className="w-full flex items-center justify-center gap-2"

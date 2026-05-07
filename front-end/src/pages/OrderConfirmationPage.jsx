@@ -53,7 +53,7 @@ const OrderConfirmationPage = () => {
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 7);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div data-cy="order-confirmation" className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
           {/* Success Message */}
@@ -72,7 +72,7 @@ const OrderConfirmationPage = () => {
             <div className="border-b border-gray-200 pb-4 mb-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-lg font-bold mb-1">Order #{order.orderId}</h2>
+                  <h2 data-cy="order-number" className="text-lg font-bold mb-1">Order #{order.orderId}</h2>
                   <p className="text-sm text-gray-600">
                     Placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
                       month: 'long',

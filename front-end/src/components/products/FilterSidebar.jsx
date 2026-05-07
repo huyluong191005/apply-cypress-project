@@ -108,6 +108,8 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
           {categories.map((category) => (
             <Checkbox
               key={category}
+              data-cy="category-filter"
+              data-filter-value={category}
               id={`category-${category}`}
               label={category}
               checked={filters.categories.includes(category)}
@@ -122,6 +124,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
         <div className="space-y-2">
           <div className="flex gap-2">
             <input
+              data-cy="price-min-input"
               type="number"
               placeholder="Min"
               value={priceRange.min}
@@ -129,6 +132,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
               className="input-field text-sm"
             />
             <input
+              data-cy="price-max-input"
               type="number"
               placeholder="Max"
               value={priceRange.max}
@@ -137,6 +141,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
             />
           </div>
           <Button
+            data-cy="price-filter-apply"
             variant="secondary"
             size="sm"
             onClick={handlePriceChange}
@@ -191,6 +196,8 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
           {brands.map((brand) => (
             <Checkbox
               key={brand}
+              data-cy="brand-filter"
+              data-filter-value={brand}
               id={`brand-${brand}`}
               label={brand}
               checked={filters.brands.includes(brand)}

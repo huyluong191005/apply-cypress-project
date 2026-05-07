@@ -2,10 +2,10 @@ import { formatPrice } from '../../utils/calculations';
 
 const CartSummary = ({ totals, showPromoInput = false, onPromoApply }) => {
   return (
-    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+    <div data-cy="cart-summary" className="bg-gray-50 rounded-lg p-4 space-y-3">
       <div className="flex justify-between text-sm">
         <span className="text-gray-600">Subtotal</span>
-        <span className="font-medium">{formatPrice(totals.subtotal)}</span>
+        <span data-cy="cart-subtotal" className="font-medium">{formatPrice(totals.subtotal)}</span>
       </div>
 
       {totals.discount > 0 && (
@@ -29,7 +29,7 @@ const CartSummary = ({ totals, showPromoInput = false, onPromoApply }) => {
 
       <div className="border-t border-gray-200 pt-3 flex justify-between">
         <span className="text-lg font-bold">Total</span>
-        <span className="text-lg font-bold text-primary-600">
+        <span data-cy="cart-total" className="text-lg font-bold text-primary-600">
           {formatPrice(totals.total)}
         </span>
       </div>

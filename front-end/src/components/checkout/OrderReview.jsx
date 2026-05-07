@@ -18,11 +18,11 @@ const OrderReview = ({ shippingInfo, paymentInfo, onSubmit, onBack, loading }) =
   };
 
   return (
-    <div className="space-y-6">
+    <div data-cy="order-review" className="space-y-6">
       <h2 className="text-xl font-bold">Review Your Order</h2>
 
       {/* Order Items */}
-      <div className="card">
+      <div data-cy="review-order-items" className="card">
         <h3 className="font-semibold mb-4">Order Items</h3>
         <div className="space-y-3">
           {cart.items.map((item) => (
@@ -43,7 +43,7 @@ const OrderReview = ({ shippingInfo, paymentInfo, onSubmit, onBack, loading }) =
       </div>
 
       {/* Shipping Information */}
-      <div className="card">
+      <div data-cy="review-shipping-address" className="card">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Shipping Address</h3>
           <button
@@ -67,7 +67,7 @@ const OrderReview = ({ shippingInfo, paymentInfo, onSubmit, onBack, loading }) =
       </div>
 
       {/* Payment Method */}
-      <div className="card">
+      <div data-cy="payment-method" className="card">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Payment Method</h3>
           <button
@@ -89,6 +89,7 @@ const OrderReview = ({ shippingInfo, paymentInfo, onSubmit, onBack, loading }) =
 
       {/* Terms and Conditions */}
       <Checkbox
+        data-cy="terms-checkbox"
         id="terms"
         checked={agreedToTerms}
         onChange={(e) => setAgreedToTerms(e.target.checked)}
@@ -112,6 +113,7 @@ const OrderReview = ({ shippingInfo, paymentInfo, onSubmit, onBack, loading }) =
           Back
         </Button>
         <Button
+          data-cy="place-order-button"
           onClick={handleSubmit}
           disabled={!agreedToTerms || loading}
           className="flex-1"

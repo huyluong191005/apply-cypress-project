@@ -67,7 +67,7 @@ const PaymentForm = ({ initialData, onSubmit, onBack }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form data-cy="payment-form" onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold mb-4">Payment Information</h2>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -77,6 +77,7 @@ const PaymentForm = ({ initialData, onSubmit, onBack }) => {
       </div>
 
       <Input
+        data-cy="payment-card-number"
         label="Card Number *"
         id="cardNumber"
         name="cardNumber"
@@ -88,6 +89,7 @@ const PaymentForm = ({ initialData, onSubmit, onBack }) => {
       />
 
       <Input
+        data-cy="payment-cardholder-name"
         label="Cardholder Name *"
         id="cardholderName"
         name="cardholderName"
@@ -99,6 +101,7 @@ const PaymentForm = ({ initialData, onSubmit, onBack }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <Input
+          data-cy="payment-expiration"
           label="Expiration Date *"
           id="expirationDate"
           name="expirationDate"
@@ -110,6 +113,7 @@ const PaymentForm = ({ initialData, onSubmit, onBack }) => {
         />
 
         <Input
+          data-cy="payment-cvv"
           label="CVV *"
           id="cvv"
           name="cvv"
@@ -134,7 +138,7 @@ const PaymentForm = ({ initialData, onSubmit, onBack }) => {
         <Button type="button" variant="secondary" onClick={onBack}>
           Back
         </Button>
-        <Button type="submit" className="flex-1">
+        <Button data-cy="continue-to-review" type="submit" className="flex-1">
           Continue to Review
         </Button>
       </div>

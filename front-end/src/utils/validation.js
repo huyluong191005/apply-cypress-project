@@ -57,7 +57,7 @@ export const validateExpirationDate = (expDate) => {
   if (month < 1 || month > 12) return false;
 
   const now = new Date();
-  const expiry = new Date(year, month - 1);
+  const expiry = new Date(year, month);
 
   return expiry > now;
 };

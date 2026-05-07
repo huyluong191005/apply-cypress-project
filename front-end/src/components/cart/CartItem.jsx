@@ -22,9 +22,10 @@ const CartItem = ({ item }) => {
   };
 
   return (
-    <div className="flex gap-4 py-4 border-b border-gray-200">
+    <div data-cy="cart-item" data-product-id={item.productId} className="flex gap-4 py-4 border-b border-gray-200">
       {/* Product Image */}
       <img
+        data-cy="cart-item-image"
         src={item.product.primaryImage}
         alt={item.product.name}
         className="w-20 h-20 object-cover rounded-lg"
@@ -32,20 +33,22 @@ const CartItem = ({ item }) => {
 
       {/* Product Info */}
       <div className="flex-1">
-        <h3 className="font-medium text-gray-900">{item.product.name}</h3>
-        <p className="text-sm text-gray-600 mt-1">{formatPrice(item.price)}</p>
+        <h3 data-cy="cart-item-name" className="font-medium text-gray-900">{item.product.name}</h3>
+        <p data-cy="cart-item-price" className="text-sm text-gray-600 mt-1">{formatPrice(item.price)}</p>
 
         {/* Quantity Controls */}
         <div className="flex items-center gap-2 mt-2">
           <button
+            data-cy="quantity-decrease"
             onClick={handleDecrement}
             className="p-1 rounded hover:bg-gray-100 transition-colors"
             disabled={item.quantity <= 1}
           >
             <Minus className="w-4 h-4" />
           </button>
-          <span className="w-8 text-center font-medium">{item.quantity}</span>
+          <span data-cy="quantity-input" className="w-8 text-center font-medium">{item.quantity}</span>
           <button
+            data-cy="quantity-increase"
             onClick={handleIncrement}
             className="p-1 rounded hover:bg-gray-100 transition-colors"
             disabled={item.quantity >= item.product.stockCount}
@@ -57,10 +60,11 @@ const CartItem = ({ item }) => {
 
       {/* Subtotal & Remove */}
       <div className="flex flex-col items-end justify-between">
-        <p className="font-semibold text-gray-900">
+        <p data-cy="cart-item-subtotal" className="font-semibold text-gray-900">
           {formatPrice(item.price * item.quantity)}
         </p>
         <button
+          data-cy="remove-cart-item"
           onClick={handleRemove}
           className="text-red-600 hover:text-red-700 transition-colors p-1"
         >
