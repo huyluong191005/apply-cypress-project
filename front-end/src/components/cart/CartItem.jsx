@@ -35,6 +35,9 @@ const CartItem = ({ item }) => {
       <div className="flex-1">
         <h3 data-cy="cart-item-name" className="font-medium text-gray-900">{item.product.name}</h3>
         <p data-cy="cart-item-price" className="text-sm text-gray-600 mt-1">{formatPrice(item.price)}</p>
+        <p data-cy="cart-item-stock" className="text-xs text-gray-500 mt-1">
+          Stock: {item.product.stockCount}
+        </p>
 
         {/* Quantity Controls */}
         <div className="flex items-center gap-2 mt-2">

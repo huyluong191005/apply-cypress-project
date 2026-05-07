@@ -1,69 +1,44 @@
 const API_URL = 'http://localhost:3001/api';
 
+const getProductsFromResponse = (body) => {
+  if (Array.isArray(body)) return body;
+  if (Array.isArray(body.products)) return body.products;
+  if (Array.isArray(body.data)) return body.data;
+  if (Array.isArray(body.data?.products)) return body.data.products;
+  return [];
+};
+
 describe('Stock limit', () => {
   beforeEach(() => {
     cy.clearAppState();
   });
 
-  it('TC13: khong cho them cung san pham vuot qua so luong ton kho', () => {
-    const limitedStockProduct = {
-      id: 999,
-      name: 'Limited Stock Test Product',
-      description: 'Only one unit is available',
-      price: 50,
-      originalPrice: null,
-      currency: 'USD',
-      primaryImage: 'https://placehold.co/400x400?text=Limited+Stock',
-      images: ['https://placehold.co/400x400?text=Limited+Stock'],
-      category: 'Test Category',
-      brand: 'Test Brand',
-      rating: 4.5,
-      reviewCount: 10,
-      inStock: true,
-      stockCount: 1,
-      attributes: {},
-      featured: true,
-    };
+  it('TC13: khong cho them san pham that vuot qua so luong ton kho', () => {
+    cy.request(`${API_URL}/products?inStock=true&limit=100`).then(({ body }) => {
+      const products = getProductsFromResponse(body);
+      const product = products
+        .filter((item) => item.inStock === true && Number(item.stockCount) > 0)
+        .sort((a, b) => Number(a.stockCount) - Number(b.stockCount))[0];
 
-    cy.intercept('GET', `${API_URL}/filters/categories`, {
-      success: true,
-      data: ['Test Category'],
+      expect(product, 'real in-stock product from API').to.exist;
+
+      const stockCount = Number(product.stockCount);
+      expect(stockCount, 'real product should have low stock for a visual test').to.be.within(1, 5);
+
+      cy.visitCatalog();
+      cy.searchProductByName(product.name);
+
+      cy.contains('[data-cy="product-card"]', product.name)
+        .should('be.visible')
+        .within(() => {
+          cy.get('[data-cy="product-stock"]').should('contain.text', `Stock: ${stockCount}`);
+
+          Cypress._.times(stockCount + 1, () => {
+            cy.get('[data-cy="add-to-cart-button"]').click();
+          });
+        });
+
+      cy.get('[data-cy="cart-count"]').should('contain.text', `${stockCount}`);
     });
-
-    cy.intercept('GET', `${API_URL}/filters/brands`, {
-      success: true,
-      data: ['Test Brand'],
-    });
-
-    cy.intercept('GET', `${API_URL}/products*`, {
-      success: true,
-      data: {
-        products: [limitedStockProduct],
-        pagination: {
-          total: 1,
-          page: 1,
-          limit: 20,
-          pages: 1,
-        },
-      },
-    }).as('getProducts');
-
-    cy.visit('/');
-    cy.wait('@getProducts');
-
-    cy.contains('[data-cy="product-card"]', limitedStockProduct.name)
-      .should('be.visible')
-      .within(() => {
-        cy.get('[data-cy="add-to-cart-button"]').click();
-      });
-
-    cy.get('[data-cy="cart-count"]').should('contain.text', '1');
-
-    cy.contains('[data-cy="product-card"]', limitedStockProduct.name)
-      .within(() => {
-        cy.get('[data-cy="add-to-cart-button"]').click();
-      });
-
-    cy.get('[data-cy="cart-count"]').should('contain.text', '1');
   });
 });

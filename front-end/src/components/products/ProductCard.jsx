@@ -73,6 +73,13 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
+          <p
+            data-cy="product-stock"
+            className={`text-sm font-medium ${product.inStock ? 'text-green-700' : 'text-gray-500'}`}
+          >
+            {product.inStock ? `Stock: ${product.stockCount}` : 'Stock: 0'}
+          </p>
+
           {/* Add to Cart Button */}
           <Button
             data-cy="add-to-cart-button"
